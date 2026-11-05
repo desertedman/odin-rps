@@ -21,67 +21,68 @@ function getComputerChoice() {
 
     default:
       alert(`How did you get this? Value: ${value}`);
-      break;
   }
 
   return ret;
 }
 
-function getHumanChoice() {
-  let string = prompt("Enter a move: ", "rock");
-  return string.trim().toLowerCase();
-}
-
 function playGame() {
   let humanScore = 0;
   let computerScore = 0;
+  let winner = "";
 
-  function setWinner(player, print) {
+  const print = false;
+  function setWinner(player) {
     if (player === "human") {
+      winner = "human"
       humanScore++;
       if (print)
         console.log("You won the round!");
     }
 
-    else {
+    else if (player === "computer") {
+      winner = "computer"
       computerScore++;
       if (print)
         console.log("Computer won the round!");
     }
+
+    else if (player === "tie") {
+      winner = "tie";
+      if (print)
+        console.log("Round tied!");
+    }
   }
 
   function playRound(humanChoice, computerChoice) {
-    humanChoice = humanChoice.trim().toLowerCase();
-
-    console.log(`${humanChoice} vs ${computerChoice}`)
+    if (print)
+      console.log(`${humanChoice} vs ${computerChoice}`)
 
     if (humanChoice === computerChoice) {
-      console.log("Tie!");
+      setWinner("tie");
       return;
     }
-
-    const print = true;
 
     switch (humanChoice) {
       case "rock":
         if (computerChoice === "paper")
-          setWinner("computer", print)
+          setWinner("computer")
         else if (computerChoice === "scissors")
-          setWinner("human", print)
+          setWinner("human")
         break;
 
       case "paper":
         if (computerChoice === "rock")
-          setWinner("human", print)
+          setWinner("human")
         else if (computerChoice === "scissors")
-          setWinner("computer", print)
+          setWinner("computer")
         break;
 
       case "scissors":
         if (computerChoice === "rock")
-          setWinner("computer", print)
+          setWinner("computer")
         else if (computerChoice === "paper")
-          setWinner("human", print)
+          setWinner("human")
         break;
 
       default:
@@ -89,19 +90,54 @@ function playGame() {
     }
   }
 
-  for (let i = 0; i < 5; i++) {
-    console.log(`Round ${i + 1}`);
-    playRound(getHumanChoice(), getComputerChoice());
+  const resultsDiv = document.querySelector("#results");
+  const messageLog = document.createElement("p");
+  const winnerLog = document.createElement("p");
+  const scoreLog = document.createElement("p");
+  resultsDiv.appendChild(messageLog);
+  resultsDiv.appendChild(winnerLog);
+  resultsDiv.appendChild(scoreLog);
+  messageLog.textContent = "Ready to play?";
 
-    console.log(`Your score: ${humanScore}\nComputer score: ${computerScore}`);
-  }
+  let rounds = 0;
+  let menu = document.querySelector("#choices");
+  menu.addEventListener("click", (e) => {
+    let id = e.target.id;
+    const computerChoice = getComputerChoice();
+    playRound(id, computerChoice);
 
-  if (humanScore === computerScore)
-    console.log("Tied game! Close one...");
-  else if (humanScore > computerScore)
-    console.log("Congratulations! You won the game.");
-  else
-    console.log("Aw shucks, the computer won. Next time!");
+    rounds++;
+    const roundCounter = document.querySelector("#rounds");
+    roundCounter.textContent = `Round ${rounds + 1}`;
+
+    messageLog.textContent = `${id} vs ${computerChoice}`;
+    if (winner === "human")
+      winnerLog.textContent = "You won!";
+    else if (winner === "computer")
+      winnerLog.textContent = "Computer won!";
+    else
+      winnerLog.textContent = "Round tied!";
+    scoreLog.textContent = `Your score: ${humanScore}\nComputer score: ${computerScore}`;
+
+    if (rounds === 5) {
+      let msg = "";
+
+      switch (winner) {
+        case "human":
+          msg = "You won the game!";
+          break;
+        case "computer":
+          msg = "You lost the game!";
+          break;
+        case "tie":
+          msg = "You tied the game!";
+          break;
+      }
+
+      alert(msg);
+      return;
+    }
+  });
 }
 
 playGame();
